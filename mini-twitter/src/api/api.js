@@ -1,4 +1,4 @@
-const MOCK_SERVER_URL = "https://2ed0ede1-ed65-4a97-870c-896daa36b457.mock.pstmn.io";
+const MOCK_SERVER_URL = "http://localhost:3001";
 
 export const getAllPosts = async () => {
   // TODO:
@@ -7,8 +7,21 @@ export const getAllPosts = async () => {
   // 3. Parse and return the JSON data.
   // 4. Wrap in a try...catch block to handle errors.
   console.log("Students will implement getAllPosts here.");
-  // Return an empty array for now to prevent UI crashes.
-  return [];
+
+   try {
+    const response = await fetch(`${MOCK_SERVER_URL}/posts`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch posts: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error in getAllPosts:", error);
+    return [];
+  }
+
 };
 
 export const getPostDetails = async (postId) => {
@@ -18,8 +31,28 @@ export const getPostDetails = async (postId) => {
   // 3. Handle errors for *both* fetches.
   // 4. Return an object containing both: { post: postData, comments: commentsData }
   console.log(`Students will implement getPostDetails for post ${postId} here.`);
-  // Return mock data for now.
-  return { post: null, comments: [] };
+
+  try{
+    const postResponse = await fetch(`${MOCK_SERVER_URL}/posts/${postId}`);
+    if (!postResponse.ok) {
+      throw new Error(`Failed to fetch post ${postId}: ${postResponse.status}`);
+    }
+
+    const commentsResponse = await fetch(`${MOCK_SERVER_URL}/posts/${postId}/comments`);
+    if (!commentsResponse.ok) {
+      throw new Error(`Failed to fetch comments for post ${postId}: ${commentsResponse.status}`);
+    }
+
+    const postData = await postResponse.json();
+    const commentsData = await commentsResponse.json();
+
+    return { post: postData, comments: commentsData };
+
+  } catch (error) {
+    console.error(`Error in getPostDetails for post ${postId}:`, error);
+    return { post: null, comments: [] };
+
+  }
 };
 
 export const createNewPost = async (newPostData) => {
@@ -31,6 +64,28 @@ export const createNewPost = async (newPostData) => {
   // 4. The `body` should be `JSON.stringify(newPostData)`.
   // 5. Handle errors.
   console.log("Students will implement createNewPost here.", newPostData);
+
+  try {
+    const response = await fetch(`${MOCK_SERVER_URL}/posts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newPostData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create new post: ${response.status}`);
+    }
+
+    const createdPost = await response.json();
+    return createdPost;
+
+  } catch (error) {
+    console.error("Error in createNewPost:", error);
+    return null;
+  }
+
 };
 
 export const createNewComment = async (postId, newCommentData) => {
@@ -40,4 +95,26 @@ export const createNewComment = async (postId, newCommentData) => {
   // 2. Include the correct `method`, `headers`, and `body` (JSON-stringified).
   // 3. Handle errors.
   console.log(`Students will implement createNewComment for post ${postId} here.`, newCommentData);
+
+  try {
+    const response = await fetch(`${MOCK_SERVER_URL}/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newCommentData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create new comment for post ${postId}: ${response.status}`);
+    }
+
+    const createdComment = await response.json();
+    return createdComment;
+
+  } catch (error) {
+    console.error(`Error in createNewComment for post ${postId}:`, error);
+    return null;
+  }
+
 };
